@@ -5,93 +5,199 @@ import pygame
 
 class Bullet(pygame.sprite.Sprite):
 
-    def __init__(self, image, speed: int) -> None:
+    def __init__(self, images: list, x: int, y: int, speed: int, direction: int) -> None:
         pygame.sprite.Sprite.__init__(self)
-        self.image = image
+        self.images = images
+        self.image = 0
+        self.rect = self.images[self.image].get_rect()
+        self.rect.x = x
+        self.rect.y = y
         self.speed = speed
+        self.direction = direction
+
+    def move(self) -> None:
+        if self.direction == 3:
+            self.rect.x += self.speed
+            if self.rect.x > width:
+                entities.remove(self)
+            self.image = 1
+        elif self.direction == 2:
+            self.rect.x -= self.speed
+            if self.rect.x < 0:
+                entities.remove(self)
+            self.image = 1
+        if self.direction == 1:
+            self.rect.y += self.speed
+            if self.rect.y > heigth:
+                entities.remove(self)
+            self.image = 0
+        elif self.direction == 0:
+            self.rect.y -= self.speed
+            if self.rect.x < 0:
+                entities.remove(self)
+            self.image = 0
+        collisions = [self.rect.colliderect(
+            entity.rect) for entity in entities if self != entity]
+        if True in collisions:
+            entities.remove(self)
+            entities.remove(entities[collisions.index(True)])
+
+    def update(self) -> None:
+        window.blit(self.images[self.image], (self.rect.x, self.rect.y))
 
 
 class Player(pygame.sprite.Sprite):
 
-    def __init__(self, image, x: int, y: int, speed: int, health: int) -> None:
+    def __init__(self, images: list, x: int, y: int, speed: int) -> None:
         pygame.sprite.Sprite.__init__(self)
-        self.image = image
-        self.rect = self.image.get_rect()
+        self.images = images
+        self.image = 0
+        self.rect = self.images[self.image].get_rect()
         self.rect.x = x
         self.rect.y = y
         self.speed = speed
-        self.health = health
 
     def movex(self, x: int) -> None:
         self.rect.x += x
-        if self.rect.x > 768:
-            self.rect.x = 768
+        if self.rect.x > width - 16:
+            self.rect.x = width - 16
         elif self.rect.x < 0:
             self.rect.x = 0
+        if True in[self.rect.colliderect(entity.rect) for entity in entities]:
+            self.rect.x -= x
 
     def movey(self, y: int) -> None:
         self.rect.y += y
-        if self.rect.y > 368:
-            self.rect.y = 368
+        if self.rect.y > height - 16:
+            self.rect.y = height - 16
         elif self.rect.y < 0:
             self.rect.y = 0
+        if True in[self.rect.colliderect(entity.rect) for entity in entities]:
+            self.rect.y -= y
+
+    def attack(self) -> None:
+        if self.image == 0:
+            x = self.rect.x + 16
+            y = self.rect.y
+        elif self.image == 1:
+            x = self.rect.x + 16
+            y = self.rect.y + 32
+        if self.image == 2:
+            x = self.rect.x
+            y = self.rect.y + 16
+        elif self.image == 3:
+            x = self.rect.x + 32
+            y = self.rect.y + 16
+        entities.append(Bullet(BULLET_IMAGES, x, y, 5, self.image))
 
     def update(self) -> None:
-        window.blit(self.image, (self.rect.x, self.rect.y))
+        window.blit(self.images[self.image], (self.rect.x, self.rect.y))
 
 
 class Tank(pygame.sprite.Sprite):
 
-    def __init__(self, images, x: int, y: int, speed: int, health: int, radius: int) -> None:
+    def __init__(self, images: list, x: int, y: int, speed: int) -> None:
         pygame.sprite.Sprite.__init__(self)
         self.images = images
-        self.rect = self.images[0].get_rect()
+        self.image = 0
+        self.rect = self.images[self.image].get_rect()
         self.rect.x = x
         self.rect.y = y
         self.speed = speed
-        self.health = health
-        self.radius = radius
 
-    def move(self) -> int:
+    def move(self) -> None:
         if abs(player.rect.x - self.rect.x) > abs(player.rect.y - self.rect.y):
             if player.rect.x > self.rect.x:
-                if abs(player.rect.x - self.rect.x) > self.radius:
+                if not (not True in[self.rect.colliderect(entity.rect) for entity in entities] or self.rect.colliderect(player.rect)):
                     self.rect.x += self.speed
-                return 3
+                self.image = 3
             elif player.rect.x < self.rect.x:
-                if abs(player.rect.x - self.rect.x) > self.radius:
+                if not (not True in[self.rect.colliderect(entity.rect) for entity in entities] or self.rect.colliderect(player.rect)):
                     self.rect.x -= self.speed
-                return 2
+                self.image = 2
         else:
             if player.rect.y > self.rect.y:
-                if abs(player.rect.y - self.rect.y) > self.radius:
+                if not (not True in[self.rect.colliderect(entity.rect) for entity in entities] or self.rect.colliderect(player.rect)):
                     self.rect.y += self.speed
-                return 1
+                self.image = 1
             elif player.rect.y < self.rect.y:
-                if abs(player.rect.y - self.rect.y) > self.radius:
+                if not (not True in[self.rect.colliderect(entity.rect) for entity in entities] or self.rect.colliderect(player.rect)):
                     self.rect.y -= self.speed
-                return 0
+                self.image = 0
 
-    def update(self, i) -> None:
-        window.blit(self.images[i], (self))
+    def attack(self) -> None:
+        entities.append(Bullet(BULLET_IMAGES, self.rect.x,
+                               self.rect.y, 5, self.image))
+
+    def update(self) -> None:
+        window.blit(self.images[self.image], (self))
 
 
+# initiating pygame
 pygame.init()
-window = pygame.display.set_mode((800, 400))
+
+# images for player tank
+PLAYER_IMAGE_UP = pygame.image.load(
+    f"images{os.sep}player{os.sep}player_up.png").convert_alpha()
+PLAYER_IMAGE_DOWN = pygame.image.load(
+    f"images{os.sep}player{os.sep}player_down.png").convert_alpha()
+PLAYER_IMAGE_LEFT = pygame.image.load(
+    f"images{os.sep}player{os.sep}player_left.png").convert_alpha()
+PLAYER_IMAGE_RIGHT = pygame.image.load(
+    f"images{os.sep}player{os.sep}player_right.png").convert_alpha()
+PLAYER_IMAGES = [PLAYER_IMAGE_UP, PLAYER_IMAGE_DOWN,
+                 PLAYER_IMAGE_LEFT, PLAYER_IMAGE_RIGHT]
+# images for green tank
+TANK_GREEN_IMAGE_UP = pygame.image.load(
+    f"images{os.sep}tank_green{os.sep}tank_green_up.png").convert_alpha()
+TANK_GREEN_IMAGE_DOWN = pygame.image.load(
+    f"images{os.sep}tank_green{os.sep}tank_green_down.png").convert_alpha()
+TANK_GREEN_IMAGE_LEFT = pygame.image.load(
+    f"images{os.sep}tank_green{os.sep}tank_green_left.png").convert_alpha()
+TANK_GREEN_IMAGE_RIGHT = pygame.image.load(
+    f"images{os.sep}tank_green{os.sep}tank_green_right.png").convert_alpha()
+TANK_GREEN_IMAGES = [TANK_GREEN_IMAGE_UP, TANK_GREEN_IMAGE_DOWN,
+                     TANK_GREEN_IMAGE_LEFT, TANK_GREEN_IMAGE_RIGHT]
+# images for red tank
+TANK_RED_IMAGE_UP = pygame.image.load(
+    f"images{os.sep}tank_red{os.sep}tank_red_up.png").convert_alpha()
+TANK_RED_IMAGE_DOWN = pygame.image.load(
+    f"images{os.sep}tank_red{os.sep}tank_red_down.png").convert_alpha()
+TANK_RED_IMAGE_LEFT = pygame.image.load(
+    f"images{os.sep}tank_red{os.sep}tank_red_left.png").convert_alpha()
+TANK_RED_IMAGE_RIGHT = pygame.image.load(
+    f"images{os.sep}tank_red{os.sep}tank_red_right.png").convert_alpha()
+TANK_RED_IMAGES = [TANK_RED_IMAGE_UP, TANK_RED_IMAGE_DOWN,
+                   TANK_RED_IMAGE_LEFT, TANK_RED_IMAGE_RIGHT]
+# images for yellow tank
+TANK_YELLOW_IMAGE_UP = pygame.image.load(
+    f"images{os.sep}tank_yellow{os.sep}tank_yellow_up.png").convert_alpha()
+TANK_YELLOW_IMAGE_DOWN = pygame.image.load(
+    f"images{os.sep}tank_yellow{os.sep}tank_yellow_down.png").convert_alpha()
+TANK_YELLOW_IMAGE_LEFT = pygame.image.load(
+    f"images{os.sep}tank_yellow{os.sep}tank_yellow_left.png").convert_alpha()
+TANK_YELLOW_IMAGE_RIGHT = pygame.image.load(
+    f"images{os.sep}tank_yellow{os.sep}tank_yellow_right.png").convert_alpha()
+TANK_YELLOW_IMAGES = [TANK_YELLOW_IMAGE_UP, TANK_YELLOW_IMAGE_DOWN,
+                      TANK_YELLOW_IMAGE_LEFT, TANK_YELLOW_IMAGE_RIGHT]
+# images for bullet
+BULLET_X_IMAGE = pygame.image.load(
+    f"images{os.sep}bullet{os.sep}bullet_x.png").convert_alpha()
+BULLET_Y_IMAGE = pygame.image.load(
+    f"images{os.sep}bullet{os.sep}bullet_y.png").convert_alpha()
+BULLET_IMAGES = [BULLET_X_IMAGE, BULLET_Y_IMAGE]
+
+# creating window
+window = pygame.display.set_mode(flags=pygame.FULLSCREEN)
+width, height = pygame.display.get_surface().get_size()
 clock = pygame.time.Clock()
 
-PLAYER_IMAGE_UP = pygame.image.load(
-    f"images{os.sep}player_up.png").convert_alpha()
-PLAYER_IMAGE_DOWN = pygame.image.load(
-    f"images{os.sep}player_down.png").convert_alpha()
-PLAYER_IMAGE_LEFT = pygame.image.load(
-    f"images{os.sep}player_left.png").convert_alpha()
-PLAYER_IMAGE_RIGHT = pygame.image.load(
-    f"images{os.sep}player_right.png").convert_alpha()
-player = Player(PLAYER_IMAGE_UP, 400, 300, 3, 1)
-entities = [Tank([PLAYER_IMAGE_UP, PLAYER_IMAGE_DOWN,
-                  PLAYER_IMAGE_LEFT, PLAYER_IMAGE_RIGHT], 30, 30, 3, 1, 18)]
+# creating player and tanks
+player = Player(PLAYER_IMAGES, 400, 300, 2)
+entities = [Tank(TANK_GREEN_IMAGES, 30, 30, 1), Tank(
+    TANK_RED_IMAGES, 600, 50, 1), Tank(TANK_YELLOW_IMAGES, 600, 360, 1)]
 
+# main game loop
 while True:
     window.fill((190, 190, 190))
     for event in pygame.event.get():
@@ -99,14 +205,19 @@ while True:
             pygame.quit()
             quit()
         elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                quit()
             if event.key == ord("a"):
-                player.image = PLAYER_IMAGE_LEFT
+                player.image = 2
             elif event.key == ord("d"):
-                player.image = PLAYER_IMAGE_RIGHT
+                player.image = 3
             elif event.key == ord("s"):
-                player.image = PLAYER_IMAGE_DOWN
+                player.image = 1
             elif event.key == ord("w"):
-                player.image = PLAYER_IMAGE_UP
+                player.image = 0
+            if event.key == ord("k"):
+                player.attack()
     keys = pygame.key.get_pressed()
     if keys[ord("a")]:
         player.movex(-player.speed)
@@ -118,7 +229,7 @@ while True:
         player.movey(-player.speed)
     player.update()
     for entity in entities:
-        i = entity.move()
-        entity.update(i)
+        entity.move()
+        entity.update()
     pygame.display.update()
     clock.tick(60)
