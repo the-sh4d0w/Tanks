@@ -4,8 +4,12 @@ import pygame
 
 
 class Bullet(pygame.sprite.Sprite):
+    """The bullet class, that provides the bullets shot by tanks."""
 
     def __init__(self, images: list, x: int, y: int, speed: int, direction: int) -> None:
+        """Initiates the bullet and sets start values.
+        Takes the variables images (list), x (integer), y (integer), speed (integer) and direction (integer).
+        """
         pygame.sprite.Sprite.__init__(self)
         self.images = images
         self.image = 0
@@ -14,8 +18,10 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.y = y
         self.speed = speed
         self.direction = direction
+        self.explosion = EXPLOSION_IMAGE
 
     def move(self) -> None:
+        """Moves the bullet in the direction the player or tank was facing when it was shot."""
         if self.direction == 3:
             self.rect.x += self.speed
             if self.rect.x > width:
@@ -28,7 +34,7 @@ class Bullet(pygame.sprite.Sprite):
             self.image = 1
         if self.direction == 1:
             self.rect.y += self.speed
-            if self.rect.y > heigth:
+            if self.rect.y > height:
                 entities.remove(self)
             self.image = 0
         elif self.direction == 0:
@@ -36,19 +42,27 @@ class Bullet(pygame.sprite.Sprite):
             if self.rect.x < 0:
                 entities.remove(self)
             self.image = 0
-        collisions = [self.rect.colliderect(
+        collisions_tanks = [self.rect.colliderect(
             entity.rect) for entity in entities if self != entity]
-        if True in collisions:
+        if True in collisions_tanks:
             entities.remove(self)
-            entities.remove(entities[collisions.index(True)])
+            entities.remove(entities[collisions_tanks.index(True)])
+            window.blit(self.explosion, (self.rect.x, self.rect.y))
+        if True in [self.rect.colliderect(wall.rect) for wall in walls]:
+            entities.remove(self)
 
     def update(self) -> None:
+        """Updates the bullet on the screen."""
         window.blit(self.images[self.image], (self.rect.x, self.rect.y))
 
 
 class Player(pygame.sprite.Sprite):
+    """The player class, provides the tank, that is controllable by the player."""
 
     def __init__(self, images: list, x: int, y: int, speed: int) -> None:
+        """Initiates the player and sets start values.
+        Takes the variables images (list), x (integer), y (integer) and speed (integer).
+        """
         pygame.sprite.Sprite.__init__(self)
         self.images = images
         self.image = 0
@@ -58,24 +72,39 @@ class Player(pygame.sprite.Sprite):
         self.speed = speed
 
     def movex(self, x: int) -> None:
+        """Moves in x-direction with positive or negative speed.
+        Takes variable x (int)."""
         self.rect.x += x
-        if self.rect.x > width - 16:
-            self.rect.x = width - 16
+        if x > 0:
+            self.image = 3
+        else:
+            self.image = 2
+        if self.rect.x > width - 32:
+            self.rect.x = width - 32
         elif self.rect.x < 0:
             self.rect.x = 0
-        if True in[self.rect.colliderect(entity.rect) for entity in entities]:
+        if True in [self.rect.colliderect(entity.rect) for entity in entities] \
+                or True in [self.rect.colliderect(wall.rect) for wall in walls]:
             self.rect.x -= x
 
     def movey(self, y: int) -> None:
+        """Moves in y-direction with positive or negative speed.
+        Takes variable y (int)."""
         self.rect.y += y
-        if self.rect.y > height - 16:
-            self.rect.y = height - 16
+        if y > 0:
+            self.image = 1
+        else:
+            self.image = 0
+        if self.rect.y > height - 32:
+            self.rect.y = height - 32
         elif self.rect.y < 0:
             self.rect.y = 0
-        if True in[self.rect.colliderect(entity.rect) for entity in entities]:
+        if True in [self.rect.colliderect(entity.rect) for entity in entities] \
+                or True in [self.rect.colliderect(wall.rect) for wall in walls]:
             self.rect.y -= y
 
     def attack(self) -> None:
+        """Spawns a bullet moving in the direction the player is facing."""
         if self.image == 0:
             x = self.rect.x + 16
             y = self.rect.y
@@ -91,12 +120,17 @@ class Player(pygame.sprite.Sprite):
         entities.append(Bullet(BULLET_IMAGES, x, y, 5, self.image))
 
     def update(self) -> None:
+        """Updates the player on the screen."""
         window.blit(self.images[self.image], (self.rect.x, self.rect.y))
 
 
 class Tank(pygame.sprite.Sprite):
+    """Tank class, that provides the enemy."""
 
     def __init__(self, images: list, x: int, y: int, speed: int) -> None:
+        """Initiates the tank and sets start values.
+        Takes the variables images (list), x (integer), y (integer) and speed (integer).
+        """
         pygame.sprite.Sprite.__init__(self)
         self.images = images
         self.image = 0
@@ -106,35 +140,68 @@ class Tank(pygame.sprite.Sprite):
         self.speed = speed
 
     def move(self) -> None:
+        """Moves the tank in the direction of the player."""
         if abs(player.rect.x - self.rect.x) > abs(player.rect.y - self.rect.y):
             if player.rect.x > self.rect.x:
-                if not (not True in[self.rect.colliderect(entity.rect) for entity in entities] or self.rect.colliderect(player.rect)):
-                    self.rect.x += self.speed
+                self.rect.x += self.speed
+                if True in [self.rect.colliderect(entity.rect) for entity in entities if entity != self] \
+                        or self.rect.colliderect(player.rect) or True in [self.rect.colliderect(wall.rect) for wall in walls]:
+                    self.rect.x -= self.speed
                 self.image = 3
             elif player.rect.x < self.rect.x:
-                if not (not True in[self.rect.colliderect(entity.rect) for entity in entities] or self.rect.colliderect(player.rect)):
-                    self.rect.x -= self.speed
+                self.rect.x -= self.speed
+                if True in [self.rect.colliderect(entity.rect) for entity in entities if entity != self] \
+                        or self.rect.colliderect(player.rect) or True in [self.rect.colliderect(wall.rect) for wall in walls]:
+                    self.rect.x += self.speed
                 self.image = 2
         else:
             if player.rect.y > self.rect.y:
-                if not (not True in[self.rect.colliderect(entity.rect) for entity in entities] or self.rect.colliderect(player.rect)):
-                    self.rect.y += self.speed
+                self.rect.y += self.speed
+                if True in [self.rect.colliderect(entity.rect) for entity in entities if entity != self] \
+                        or self.rect.colliderect(player.rect) or True in [self.rect.colliderect(wall.rect) for wall in walls]:
+                    self.rect.y -= self.speed
                 self.image = 1
             elif player.rect.y < self.rect.y:
-                if not (not True in[self.rect.colliderect(entity.rect) for entity in entities] or self.rect.colliderect(player.rect)):
-                    self.rect.y -= self.speed
+                self.rect.y -= self.speed
+                if True in [self.rect.colliderect(entity.rect) for entity in entities if entity != self] \
+                        or self.rect.colliderect(player.rect) or True in [self.rect.colliderect(wall.rect) for wall in walls]:
+                    self.rect.y += self.speed
                 self.image = 0
 
     def attack(self) -> None:
+        """Spawns a bullet moving in the direction the tank is facing."""
         entities.append(Bullet(BULLET_IMAGES, self.rect.x,
                                self.rect.y, 5, self.image))
 
     def update(self) -> None:
-        window.blit(self.images[self.image], (self))
+        """Updates the tank on the screen."""
+        window.blit(self.images[self.image], (self.rect.x, self.rect.y))
+
+
+class Wall(pygame.sprite.Sprite):
+    """Wall class, provides barriers."""
+
+    def __init__(self, image, x: int, y: int) -> None:
+        """Initiates the wall and sets start values.
+        Takes the variables image (I son't really know), x (integer) and y (integer).
+        """
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+    def update(self) -> None:
+        """Updates the wall on the screen."""
+        window.blit(self.image, (self.rect.x, self.rect.y))
 
 
 # initiating pygame
 pygame.init()
+
+# creating window
+window = pygame.display.set_mode(flags=pygame.FULLSCREEN)
+width, height = pygame.display.get_surface().get_size()
+clock = pygame.time.Clock()
 
 # images for player tank
 PLAYER_IMAGE_UP = pygame.image.load(
@@ -186,16 +253,17 @@ BULLET_X_IMAGE = pygame.image.load(
 BULLET_Y_IMAGE = pygame.image.load(
     f"images{os.sep}bullet{os.sep}bullet_y.png").convert_alpha()
 BULLET_IMAGES = [BULLET_X_IMAGE, BULLET_Y_IMAGE]
-
-# creating window
-window = pygame.display.set_mode(flags=pygame.FULLSCREEN)
-width, height = pygame.display.get_surface().get_size()
-clock = pygame.time.Clock()
+# images for walls
+WALL_I_X_IMAGE = pygame.image.load(f"images{os.sep}wall{os.sep}wall_I_x.png")
+# image for explosion
+EXPLOSION_IMAGE = pygame.image.load(
+    f"images{os.sep}explosion.png").convert_alpha()
 
 # creating player and tanks
 player = Player(PLAYER_IMAGES, 400, 300, 2)
 entities = [Tank(TANK_GREEN_IMAGES, 30, 30, 1), Tank(
     TANK_RED_IMAGES, 600, 50, 1), Tank(TANK_YELLOW_IMAGES, 600, 360, 1)]
+walls = [Wall(WALL_I_X_IMAGE, 1000, 700)]
 
 # main game loop
 while True:
@@ -208,14 +276,6 @@ while True:
             if event.key == pygame.K_ESCAPE:
                 pygame.quit()
                 quit()
-            if event.key == ord("a"):
-                player.image = 2
-            elif event.key == ord("d"):
-                player.image = 3
-            elif event.key == ord("s"):
-                player.image = 1
-            elif event.key == ord("w"):
-                player.image = 0
             if event.key == ord("k"):
                 player.attack()
     keys = pygame.key.get_pressed()
@@ -231,5 +291,7 @@ while True:
     for entity in entities:
         entity.move()
         entity.update()
+    for wall in walls:
+        wall.update()
     pygame.display.update()
     clock.tick(60)
