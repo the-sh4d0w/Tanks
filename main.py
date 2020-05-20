@@ -264,6 +264,10 @@ WALL_I_Y_IMAGE = pygame.image.load(f"images{os.sep}wall{os.sep}wall_I_y.png")
 EXPLOSION_IMAGE = pygame.image.load(
     f"images{os.sep}explosion.png").convert_alpha()
 
+# music
+BACKGROUND_MUSIC_PATH = f"sound{os.sep}background_song.wav"
+MENU_MUSIC_PATH = f"sound{os.sep}menu_song.wav"
+
 # creating player and tanks
 player = Player(PLAYER_IMAGES, 200, 80, 2)
 entities = [Tank(TANK_GREEN_IMAGES, 30, 30, 1), Tank(
@@ -275,6 +279,8 @@ def menu_screen():
     """Starts the menu screen."""
     menu = True
     start = True
+    pygame.mixer.music.load(MENU_MUSIC_PATH)
+    pygame.mixer.music.play(-1)
     while menu:
         window.fill((190, 190, 190))
         for event in pygame.event.get():
@@ -306,6 +312,7 @@ def menu_screen():
                 "Beenden", False, (0, 0, 150)), (380, 200))
         pygame.display.update()
         clock.tick(60)
+    pygame.mixer.music.stop()
     game_loop()
 
 
@@ -350,6 +357,8 @@ def game_over():
 def game_loop():
     """The main game loop that updates everyting."""
     game = True
+    pygame.mixer.music.load(BACKGROUND_MUSIC_PATH)
+    pygame.mixer.music.play(-1)
     while game:
         window.fill((190, 190, 190))
         for event in pygame.event.get():
@@ -380,6 +389,7 @@ def game_loop():
             wall.update()
         pygame.display.update()
         clock.tick(60)
+    pygame.mixer.music.stop()
     menu_screen()
 
 
