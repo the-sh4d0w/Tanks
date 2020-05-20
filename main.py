@@ -24,7 +24,7 @@ class Bullet(pygame.sprite.Sprite):
         """Moves the bullet in the direction the player or tank was facing when it was shot."""
         if self.direction == 3:
             self.rect.x += self.speed
-            if self.rect.x > width:
+            if self.rect.x > WIDTH:
                 entities.remove(self)
             self.image = 1
         elif self.direction == 2:
@@ -34,7 +34,7 @@ class Bullet(pygame.sprite.Sprite):
             self.image = 1
         if self.direction == 1:
             self.rect.y += self.speed
-            if self.rect.y > height:
+            if self.rect.y > HEIGHT:
                 entities.remove(self)
             self.image = 0
         elif self.direction == 0:
@@ -47,7 +47,7 @@ class Bullet(pygame.sprite.Sprite):
         if True in collisions_tanks:
             entities.remove(self)
             entities.remove(entities[collisions_tanks.index(True)])
-            window.blit(self.explosion, (self.rect.x, self.rect.y))
+            window.blit(self.explosion, (self.rect.x - 10, self.rect.y - 10))
         if True in [self.rect.colliderect(wall.rect) for wall in walls]:
             entities.remove(self)
 
@@ -79,8 +79,8 @@ class Player(pygame.sprite.Sprite):
             self.image = 3
         else:
             self.image = 2
-        if self.rect.x > width - 32:
-            self.rect.x = width - 32
+        if self.rect.x > WIDTH - self.rect.width:
+            self.rect.x = WIDTH - self.rect.width
         elif self.rect.x < 0:
             self.rect.x = 0
         if True in [self.rect.colliderect(entity.rect) for entity in entities] \
@@ -95,8 +95,8 @@ class Player(pygame.sprite.Sprite):
             self.image = 1
         else:
             self.image = 0
-        if self.rect.y > height - 32:
-            self.rect.y = height - 32
+        if self.rect.y > HEIGHT - self.rect.height:
+            self.rect.y = HEIGHT - self.rect.height
         elif self.rect.y < 0:
             self.rect.y = 0
         if True in [self.rect.colliderect(entity.rect) for entity in entities] \
@@ -199,8 +199,12 @@ class Wall(pygame.sprite.Sprite):
 pygame.init()
 
 # creating window
-window = pygame.display.set_mode(flags=pygame.FULLSCREEN)
-width, height = pygame.display.get_surface().get_size()
+WIDTH, HEIGHT = 800, 400
+window = pygame.display.set_mode(
+    size=(WIDTH, HEIGHT), flags=pygame.SCALED | pygame.RESIZABLE)
+pygame.display.set_caption("Tanks")
+pygame.display.set_icon(pygame.image.load(
+    f"images{os.sep}player{os.sep}player_up.png"))
 clock = pygame.time.Clock()
 
 # images for player tank
@@ -255,43 +259,128 @@ BULLET_Y_IMAGE = pygame.image.load(
 BULLET_IMAGES = [BULLET_X_IMAGE, BULLET_Y_IMAGE]
 # images for walls
 WALL_I_X_IMAGE = pygame.image.load(f"images{os.sep}wall{os.sep}wall_I_x.png")
+WALL_I_Y_IMAGE = pygame.image.load(f"images{os.sep}wall{os.sep}wall_I_y.png")
 # image for explosion
 EXPLOSION_IMAGE = pygame.image.load(
     f"images{os.sep}explosion.png").convert_alpha()
 
 # creating player and tanks
-player = Player(PLAYER_IMAGES, 400, 300, 2)
+player = Player(PLAYER_IMAGES, 200, 80, 2)
 entities = [Tank(TANK_GREEN_IMAGES, 30, 30, 1), Tank(
     TANK_RED_IMAGES, 600, 50, 1), Tank(TANK_YELLOW_IMAGES, 600, 360, 1)]
-walls = [Wall(WALL_I_X_IMAGE, 1000, 700)]
+walls = [Wall(WALL_I_X_IMAGE, 200, 70), Wall(WALL_I_Y_IMAGE, 240, 70)]
 
-# main game loop
-while True:
-    window.fill((190, 190, 190))
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            quit()
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
+
+def menu_screen():
+    """Starts the menu screen."""
+    menu = True
+    start = True
+    while menu:
+        window.fill((190, 190, 190))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-            if event.key == ord("k"):
-                player.attack()
-    keys = pygame.key.get_pressed()
-    if keys[ord("a")]:
-        player.movex(-player.speed)
-    elif keys[ord("d")]:
-        player.movex(player.speed)
-    elif keys[ord("s")]:
-        player.movey(player.speed)
-    elif keys[ord("w")]:
-        player.movey(-player.speed)
-    player.update()
-    for entity in entities:
-        entity.move()
-        entity.update()
-    for wall in walls:
-        wall.update()
-    pygame.display.update()
-    clock.tick(60)
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    start = not start
+                elif event.key == pygame.K_DOWN:
+                    start = not start
+                elif event.key == pygame.K_RETURN:
+                    if start:
+                        menu = False
+                    else:
+                        pygame.quit()
+                        quit()
+        window.blit(pygame.font.SysFont("", 40).render(
+            "Tanks", False, (0, 0, 255)), (380, 70))
+        if start:
+            window.blit(pygame.font.SysFont("", 20).render(
+                "Starten", False, (0, 0, 150)), (380, 150))
+            window.blit(pygame.font.SysFont("", 20).render(
+                "Beenden", False, (0, 0, 0)), (380, 200))
+        else:
+            window.blit(pygame.font.SysFont("", 20).render(
+                "Starten", False, (0, 0, 0)), (380, 150))
+            window.blit(pygame.font.SysFont("", 20).render(
+                "Beenden", False, (0, 0, 150)), (380, 200))
+        pygame.display.update()
+        clock.tick(60)
+    game_loop()
+
+
+def game_over():
+    """The game over screen."""
+    game_over_ = True
+    ok = True
+    while game_over_:
+        window.fill((190, 190, 190))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    ok = not ok
+                elif event.key == pygame.K_LEFT:
+                    ok = not ok
+                elif event.key == pygame.K_RETURN:
+                    if ok:
+                        game_over_ = False
+                    else:
+                        pygame.quit()
+                        quit()
+        window.blit(pygame.font.SysFont("", 50).render(
+            "GAME OVER", False, (255, 0, 0)), (300, 150))
+        if ok:
+            window.blit(pygame.font.SysFont("", 20).render(
+                "OK", False, (0, 0, 150)), (300, 200))
+            window.blit(pygame.font.SysFont("", 20).render(
+                "Beenden", False, (0, 0, 0)), (420, 200))
+        else:
+            window.blit(pygame.font.SysFont("", 20).render(
+                "OK", False, (0, 0, 0)), (300, 200))
+            window.blit(pygame.font.SysFont("", 20).render(
+                "Beenden", False, (0, 0, 150)), (420, 200))
+        pygame.display.update()
+        clock.tick(60)
+    game_loop()
+
+
+def game_loop():
+    """The main game loop that updates everyting."""
+    game = True
+    while game:
+        window.fill((190, 190, 190))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    game = False
+                if event.key == ord("k"):
+                    player.attack()
+                elif event.key == ord("q"):
+                    game_over()
+        keys = pygame.key.get_pressed()
+        if keys[ord("a")]:
+            player.movex(-player.speed)
+        elif keys[ord("d")]:
+            player.movex(player.speed)
+        elif keys[ord("s")]:
+            player.movey(player.speed)
+        elif keys[ord("w")]:
+            player.movey(-player.speed)
+        player.update()
+        for entity in entities:
+            entity.move()
+            entity.update()
+        for wall in walls:
+            wall.update()
+        pygame.display.update()
+        clock.tick(60)
+    menu_screen()
+
+
+menu_screen()
