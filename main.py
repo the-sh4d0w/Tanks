@@ -49,9 +49,13 @@ class Bullet(pygame.sprite.Sprite):
             entities.remove(self)
             entities.remove(entities[collisions_tanks.index(True)])
             window.blit(self.explosion, (self.rect.x - 10, self.rect.y - 10))
+            pygame.mixer.music.load(EXPLOSION_SOUND_PATH)
+            pygame.mixer.music.play()
         if True in [self.rect.colliderect(wall.rect) for wall in walls]:
             entities.remove(self)
         if self.rect.colliderect(player.rect):
+            pygame.mixer.music.load(EXPLOSION_SOUND_PATH)
+            pygame.mixer.music.play()
             game_over()
 
     def attack(self) -> None:
@@ -124,6 +128,8 @@ class Player(pygame.sprite.Sprite):
             x = self.rect.x + 32
             y = self.rect.y + 16
         entities.append(Bullet(BULLET_IMAGES, x, y, 5, self.image))
+        pygame.mixer.music.load(SHOT_SOUND_PATH)
+        pygame.mixer.music.play()
 
     def update(self) -> None:
         """Updates the player on the screen."""
@@ -208,6 +214,8 @@ class Tank(pygame.sprite.Sprite):
                     x = self.rect.x + 32
                     y = self.rect.y + 16
                 entities.append(Bullet(BULLET_IMAGES, x, y, 5, self.image))
+                pygame.mixer.music.load(SHOT_SOUND_PATH)
+                pygame.mixer.music.play()
                 self.attack_allowed = 10
             else:
                 self.attack_allowed -= 1
@@ -316,6 +324,9 @@ BACKGROUND_MUSIC_PATH = f"sound{os.sep}background_song.wav"
 MENU_MUSIC_PATH = f"sound{os.sep}menu_song.wav"
 GAME_OVER_MUSIC_PATH = f"sound{os.sep}game_over_song.wav"
 WINNER_MUSIC_PATH = f"sound{os.sep}winner_song.wav"
+# sounds
+EXPLOSION_SOUND_PATH = f"sound{os.sep}explosion_sound.wav"
+SHOT_SOUND_PATH = f"sound{os.sep}shot_sound.wav"
 
 
 def load_level(level_nummer: int) -> None:
