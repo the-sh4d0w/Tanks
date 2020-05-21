@@ -1,3 +1,4 @@
+import json
 import os
 
 import pygame
@@ -50,6 +51,11 @@ class Bullet(pygame.sprite.Sprite):
             window.blit(self.explosion, (self.rect.x - 10, self.rect.y - 10))
         if True in [self.rect.colliderect(wall.rect) for wall in walls]:
             entities.remove(self)
+        if self.rect.colliderect(player.rect):
+            game_over()
+
+    def attack(self) -> None:
+        pass
 
     def update(self) -> None:
         """Updates the bullet on the screen."""
@@ -127,7 +133,7 @@ class Player(pygame.sprite.Sprite):
 class Tank(pygame.sprite.Sprite):
     """Tank class, that provides the enemy."""
 
-    def __init__(self, images: list, x: int, y: int, speed: int) -> None:
+    def __init__(self, images: list, x: int, y: int, speed: int, radius: int) -> None:
         """Initiates the tank and sets start values.
         Takes the variables images (list), x (integer), y (integer) and speed (integer).
         """
@@ -138,6 +144,8 @@ class Tank(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         self.speed = speed
+        self.radius = radius
+        self.attack_allowed = 0
 
     def move(self) -> None:
         """Moves the tank in the direction of the player."""
@@ -154,7 +162,7 @@ class Tank(pygame.sprite.Sprite):
                         or self.rect.colliderect(player.rect) or True in [self.rect.colliderect(wall.rect) for wall in walls]:
                     self.rect.x += self.speed
                 self.image = 2
-        else:
+        elif abs(player.rect.x - self.rect.x) < abs(player.rect.y - self.rect.y):
             if player.rect.y > self.rect.y:
                 self.rect.y += self.speed
                 if True in [self.rect.colliderect(entity.rect) for entity in entities if entity != self] \
@@ -167,11 +175,42 @@ class Tank(pygame.sprite.Sprite):
                         or self.rect.colliderect(player.rect) or True in [self.rect.colliderect(wall.rect) for wall in walls]:
                     self.rect.y += self.speed
                 self.image = 0
+        else:
+            if player.rect.x > self.rect.x:
+                self.rect.x += self.speed
+                if True in [self.rect.colliderect(entity.rect) for entity in entities if entity != self] \
+                        or self.rect.colliderect(player.rect) or True in [self.rect.colliderect(wall.rect) for wall in walls]:
+                    self.rect.x -= self.speed
+                self.image = 3
+            elif player.rect.x < self.rect.x:
+                self.rect.x -= self.speed
+                if True in [self.rect.colliderect(entity.rect) for entity in entities if entity != self] \
+                        or self.rect.colliderect(player.rect) or True in [self.rect.colliderect(wall.rect) for wall in walls]:
+                    self.rect.x += self.speed
+                self.image = 2
 
     def attack(self) -> None:
-        """Spawns a bullet moving in the direction the tank is facing."""
-        entities.append(Bullet(BULLET_IMAGES, self.rect.x,
-                               self.rect.y, 5, self.image))
+        """Spawns a bullet moving in the direction the tank is facing
+        if it is in a certain radius around the player."""
+        if abs(player.rect.x - self.rect.x) < self.radius \
+                and abs(player.rect.y - self.rect.y) < self.radius:
+            if not self.attack_allowed:
+                if self.image == 0:
+                    x = self.rect.x + 16
+                    y = self.rect.y
+                elif self.image == 1:
+                    x = self.rect.x + 16
+                    y = self.rect.y + 32
+                if self.image == 2:
+                    x = self.rect.x
+                    y = self.rect.y + 16
+                elif self.image == 3:
+                    x = self.rect.x + 32
+                    y = self.rect.y + 16
+                entities.append(Bullet(BULLET_IMAGES, x, y, 5, self.image))
+                self.attack_allowed = 10
+            else:
+                self.attack_allowed -= 1
 
     def update(self) -> None:
         """Updates the tank on the screen."""
@@ -264,18 +303,43 @@ WALL_I_Y_IMAGE = pygame.image.load(f"images{os.sep}wall{os.sep}wall_I_y.png")
 EXPLOSION_IMAGE = pygame.image.load(
     f"images{os.sep}explosion.png").convert_alpha()
 
+colors = {"green": TANK_GREEN_IMAGES,
+          "red": TANK_RED_IMAGES, "yellow": TANK_YELLOW_IMAGES}
+wall_types = {"I_x": WALL_I_X_IMAGE, "I_y": WALL_I_Y_IMAGE}
+player = None
+entities = None
+walls = None
+level = 1
+
 # music
 BACKGROUND_MUSIC_PATH = f"sound{os.sep}background_song.wav"
 MENU_MUSIC_PATH = f"sound{os.sep}menu_song.wav"
-
-# creating player and tanks
-player = Player(PLAYER_IMAGES, 200, 80, 2)
-entities = [Tank(TANK_GREEN_IMAGES, 30, 30, 1), Tank(
-    TANK_RED_IMAGES, 600, 50, 1), Tank(TANK_YELLOW_IMAGES, 600, 360, 1)]
-walls = [Wall(WALL_I_X_IMAGE, 200, 70), Wall(WALL_I_Y_IMAGE, 240, 70)]
+GAME_OVER_MUSIC_PATH = f"sound{os.sep}game_over_song.wav"
+WINNER_MUSIC_PATH = f"sound{os.sep}winner_song.wav"
 
 
-def menu_screen():
+def load_level(level_nummer: int) -> None:
+    """Loads level from json file."""
+    global player
+    global entities
+    global walls
+    with open(f"level_{level_nummer}.json", "r") as f:
+        level = json.load(f)
+    spawn_x, spawn_y = tuple(level["spawn"])
+    tanks = level["enemies"]
+    walls_ = level["walls"]
+    player = Player(PLAYER_IMAGES, spawn_x, spawn_y, 2)
+    entities = []
+    for tank in tanks:
+        x, y = tuple(tank["spawn"])
+        entities.append(Tank(colors[tank["color"]], x, y, 1, 50))
+    walls = []
+    for wall in walls_:
+        x, y = tuple(wall["position"])
+        walls.append(Wall(wall_types[wall["type"]], x, y))
+
+
+def menu_screen() -> None:
     """Starts the menu screen."""
     menu = True
     start = True
@@ -316,10 +380,57 @@ def menu_screen():
     game_loop()
 
 
-def game_over():
-    """The game over screen."""
+def winner_screen() -> None:
+    """The winner screen."""
+    global level
+    level += 1
     game_over_ = True
     ok = True
+    pygame.mixer.music.load(WINNER_MUSIC_PATH)
+    pygame.mixer.music.play(-1)
+    while game_over_:
+        window.fill((190, 190, 190))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    ok = not ok
+                elif event.key == pygame.K_LEFT:
+                    ok = not ok
+                elif event.key == pygame.K_RETURN:
+                    if ok:
+                        game_over_ = False
+                    else:
+                        pygame.quit()
+                        quit()
+        window.blit(pygame.font.SysFont("", 50).render(
+            "Du hast gewonnen!", False, (0, 155, 0)), (240, 150))
+        if ok:
+            window.blit(pygame.font.SysFont("", 20).render(
+                "Weiter", False, (0, 0, 150)), (280, 200))
+            window.blit(pygame.font.SysFont("", 20).render(
+                "Beenden", False, (0, 0, 0)), (420, 200))
+        else:
+            window.blit(pygame.font.SysFont("", 20).render(
+                "Weiter", False, (0, 0, 0)), (280, 200))
+            window.blit(pygame.font.SysFont("", 20).render(
+                "Beenden", False, (0, 0, 150)), (420, 200))
+        pygame.display.update()
+        clock.tick(60)
+    pygame.mixer.music.stop()
+    game_loop()
+
+
+def game_over() -> None:
+    """The game over screen."""
+    global level
+    level = 1
+    game_over_ = True
+    ok = True
+    pygame.mixer.music.load(GAME_OVER_MUSIC_PATH)
+    pygame.mixer.music.play(-1)
     while game_over_:
         window.fill((190, 190, 190))
         for event in pygame.event.get():
@@ -351,11 +462,18 @@ def game_over():
                 "Beenden", False, (0, 0, 150)), (420, 200))
         pygame.display.update()
         clock.tick(60)
+    pygame.mixer.music.stop()
     game_loop()
 
 
-def game_loop():
+def game_loop() -> None:
     """The main game loop that updates everyting."""
+    global level
+    try:
+        load_level(level)
+    except:
+        level = 1
+        load_level(level)
     game = True
     pygame.mixer.music.load(BACKGROUND_MUSIC_PATH)
     pygame.mixer.music.play(-1)
@@ -370,8 +488,6 @@ def game_loop():
                     game = False
                 if event.key == ord("k"):
                     player.attack()
-                elif event.key == ord("q"):
-                    game_over()
         keys = pygame.key.get_pressed()
         if keys[ord("a")]:
             player.movex(-player.speed)
@@ -384,11 +500,14 @@ def game_loop():
         player.update()
         for entity in entities:
             entity.move()
+            entity.attack()
             entity.update()
         for wall in walls:
             wall.update()
         pygame.display.update()
         clock.tick(60)
+        if not entities:
+            winner_screen()
     pygame.mixer.music.stop()
     menu_screen()
 

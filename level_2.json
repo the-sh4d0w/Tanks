@@ -1,0 +1,23 @@
+{
+    "spawn": [
+        400,
+        200
+    ],
+    "enemies": [
+        {
+            "color": "red",
+            "spawn": [
+                200,
+                10
+            ]
+        },
+        {
+            "color": "yellow",
+            "spawn": [
+                600,
+                360
+            ]
+        }
+    ],
+    "walls": []
+}
