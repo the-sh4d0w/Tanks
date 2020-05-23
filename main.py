@@ -198,8 +198,8 @@ class Tank(pygame.sprite.Sprite):
     def attack(self) -> None:
         """Spawns a bullet moving in the direction the tank is facing
         if it is in a certain radius around the player."""
-        if abs(player.rect.x - self.rect.x) < self.radius \
-                and abs(player.rect.y - self.rect.y) < self.radius:
+        if abs((player.rect.x + 16) - (self.rect.x + 16)) < self.radius \
+                and abs((player.rect.y + 16) - (self.rect.y + 16)) < self.radius:
             if not self.attack_allowed:
                 if self.image == 0:
                     x = self.rect.x + 16
@@ -343,7 +343,7 @@ def load_level(level_nummer: int) -> None:
     entities = []
     for tank in tanks:
         x, y = tuple(tank["spawn"])
-        entities.append(Tank(colors[tank["color"]], x, y, 1, 50))
+        entities.append(Tank(colors[tank["color"]], x, y, 1, 60))
     walls = []
     for wall in walls_:
         x, y = tuple(wall["position"])
@@ -436,8 +436,6 @@ def winner_screen() -> None:
 
 def game_over() -> None:
     """The game over screen."""
-    global level
-    level = 1
     game_over_ = True
     ok = True
     pygame.mixer.music.load(GAME_OVER_MUSIC_PATH)
@@ -490,6 +488,8 @@ def game_loop() -> None:
     pygame.mixer.music.play(-1)
     while game:
         window.fill((190, 190, 190))
+        window.blit(pygame.font.SysFont("", 20).render(
+            str(level), False, (0, 0, 255)), (5, 5))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
