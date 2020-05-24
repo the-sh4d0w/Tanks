@@ -50,7 +50,7 @@ Dies ist Level 1. Er ist als JSON-Datei gespeichert.
         }
     ]
 }
-´´´
+```
 Das ``object`` enthält drei Elemente: "spawn", der Startpunkt des Spielers, "enemies", eine Liste aller Gegner, und "walls", eine Liste aller Wände.
 "spawn" ist ein ``array`` mit einer x-Koordinate und einer y-Koordinate (Das Feld ist immer 800x400 groß).
 
