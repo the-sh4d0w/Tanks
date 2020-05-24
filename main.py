@@ -391,6 +391,49 @@ def menu_screen() -> None:
     game_loop()
 
 
+def game_winner_screen() -> None:
+    """The game winner screen."""
+    global level
+    level += 1
+    game_over_ = True
+    ok = True
+    pygame.mixer.music.load(WINNER_MUSIC_PATH)
+    pygame.mixer.music.play(-1)
+    while game_over_:
+        window.fill((190, 190, 190))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT:
+                    ok = not ok
+                elif event.key == pygame.K_LEFT:
+                    ok = not ok
+                elif event.key == pygame.K_RETURN:
+                    if ok:
+                        game_over_ = False
+                    else:
+                        pygame.quit()
+                        quit()
+        window.blit(pygame.font.SysFont("", 50).render(
+            "Du hast gewonnen!", False, (0, 155, 0)), (240, 150))
+        if ok:
+            window.blit(pygame.font.SysFont("", 20).render(
+                "Weiter", False, (0, 0, 150)), (280, 200))
+            window.blit(pygame.font.SysFont("", 20).render(
+                "Beenden", False, (0, 0, 0)), (420, 200))
+        else:
+            window.blit(pygame.font.SysFont("", 20).render(
+                "Weiter", False, (0, 0, 0)), (280, 200))
+            window.blit(pygame.font.SysFont("", 20).render(
+                "Beenden", False, (0, 0, 150)), (420, 200))
+        pygame.display.update()
+        clock.tick(60)
+    pygame.mixer.music.stop()
+    menu_screen()
+
+
 def level_winner_screen() -> None:
     """The level winner screen."""
     global level
@@ -417,7 +460,7 @@ def level_winner_screen() -> None:
                         pygame.quit()
                         quit()
         window.blit(pygame.font.SysFont("", 50).render(
-            "Du hast gewonnen!", False, (0, 155, 0)), (240, 150))
+            "Level geschafft!", False, (0, 155, 0)), (240, 150))
         if ok:
             window.blit(pygame.font.SysFont("", 20).render(
                 "Weiter", False, (0, 0, 150)), (280, 200))
@@ -482,7 +525,7 @@ def game_loop() -> None:
         load_level(level)
     except:
         level = 1
-        load_level(level)
+        game_winner_screen()
     game = True
     pygame.mixer.music.load(BACKGROUND_MUSIC_PATH)
     pygame.mixer.music.play(-1)
