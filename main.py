@@ -334,7 +334,7 @@ def load_level(level_nummer: int) -> None:
     global player
     global entities
     global walls
-    with open(f"level_{level_nummer}.json", "r") as f:
+    with open(f"level{os.sep}level_{level_nummer}.json", "r") as f:
         level = json.load(f)
     spawn_x, spawn_y = tuple(level["spawn"])
     tanks = level["enemies"]
@@ -391,8 +391,8 @@ def menu_screen() -> None:
     game_loop()
 
 
-def winner_screen() -> None:
-    """The winner screen."""
+def level_winner_screen() -> None:
+    """The level winner screen."""
     global level
     level += 1
     game_over_ = True
@@ -518,7 +518,7 @@ def game_loop() -> None:
         pygame.display.update()
         clock.tick(60)
         if not entities:
-            winner_screen()
+            level_winner_screen()
     pygame.mixer.music.stop()
     menu_screen()
 
