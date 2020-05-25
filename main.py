@@ -343,7 +343,7 @@ def load_level(level_nummer: int) -> None:
     entities = []
     for tank in tanks:
         x, y = tuple(tank["spawn"])
-        entities.append(Tank(colors[tank["color"]], x, y, 1, 60))
+        entities.append(Tank(colors[tank["color"]], x, y, 1, 75))
     walls = []
     for wall in walls_:
         x, y = tuple(wall["position"])
@@ -394,12 +394,12 @@ def menu_screen() -> None:
 def game_winner_screen() -> None:
     """The game winner screen."""
     global level
-    level += 1
-    game_over_ = True
+    level = 1
+    winner = True
     ok = True
     pygame.mixer.music.load(WINNER_MUSIC_PATH)
     pygame.mixer.music.play(-1)
-    while game_over_:
+    while winner:
         window.fill((190, 190, 190))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -412,7 +412,7 @@ def game_winner_screen() -> None:
                     ok = not ok
                 elif event.key == pygame.K_RETURN:
                     if ok:
-                        game_over_ = False
+                        winner = False
                     else:
                         pygame.quit()
                         quit()
@@ -438,11 +438,11 @@ def level_winner_screen() -> None:
     """The level winner screen."""
     global level
     level += 1
-    game_over_ = True
+    winner = True
     ok = True
     pygame.mixer.music.load(WINNER_MUSIC_PATH)
     pygame.mixer.music.play(-1)
-    while game_over_:
+    while winner:
         window.fill((190, 190, 190))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -455,7 +455,7 @@ def level_winner_screen() -> None:
                     ok = not ok
                 elif event.key == pygame.K_RETURN:
                     if ok:
-                        game_over_ = False
+                        winner = False
                     else:
                         pygame.quit()
                         quit()
@@ -524,7 +524,6 @@ def game_loop() -> None:
     try:
         load_level(level)
     except:
-        level = 1
         game_winner_screen()
     game = True
     pygame.mixer.music.load(BACKGROUND_MUSIC_PATH)
@@ -560,7 +559,7 @@ def game_loop() -> None:
             wall.update()
         pygame.display.update()
         clock.tick(60)
-        if not entities:
+        if not any(isinstance(entity, Tank) for entity in entities):
             level_winner_screen()
     pygame.mixer.music.stop()
     menu_screen()
