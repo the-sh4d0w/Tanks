@@ -7,7 +7,7 @@ import pygame
 class Bullet(pygame.sprite.Sprite):
     """The bullet class, that provides the bullets shot by tanks."""
 
-    def __init__(self, images: list, x: int, y: int, speed: int, direction: int) -> None:
+    def __init__(self, images: list, x: int, y: int, direction: int) -> None:
         """Initiates the bullet and sets start values.
         Takes the variables images (list), x (integer), y (integer), speed (integer) and direction (integer).
         """
@@ -17,7 +17,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.images[self.image].get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.speed = speed
+        self.speed = 4
         self.direction = direction
         self.explosion = EXPLOSION_IMAGE
 
@@ -49,13 +49,12 @@ class Bullet(pygame.sprite.Sprite):
             entities.remove(self)
             entities.remove(entities[collisions_tanks.index(True)])
             window.blit(self.explosion, (self.rect.x - 10, self.rect.y - 10))
-            pygame.mixer.music.load(EXPLOSION_SOUND_PATH)
-            pygame.mixer.music.play()
+            pygame.mixer.Sound(EXPLOSION_SOUND_PATH).play()
         if True in [self.rect.colliderect(wall.rect) for wall in walls]:
             entities.remove(self)
         if self.rect.colliderect(player.rect):
-            pygame.mixer.music.load(EXPLOSION_SOUND_PATH)
-            pygame.mixer.music.play()
+            window.blit(self.explosion, (self.rect.x - 10, self.rect.y - 10))
+            pygame.mixer.Sound(EXPLOSION_SOUND_PATH).play()
             game_over()
 
     def attack(self) -> None:
@@ -127,9 +126,8 @@ class Player(pygame.sprite.Sprite):
         elif self.image == 3:
             x = self.rect.x + 32
             y = self.rect.y + 16
-        entities.append(Bullet(BULLET_IMAGES, x, y, 5, self.image))
-        pygame.mixer.music.load(SHOT_SOUND_PATH)
-        pygame.mixer.music.play()
+        entities.append(Bullet(BULLET_IMAGES, x, y, self.image))
+        pygame.mixer.Sound(SHOT_SOUND_PATH).play()
 
     def update(self) -> None:
         """Updates the player on the screen."""
@@ -213,9 +211,8 @@ class Tank(pygame.sprite.Sprite):
                 elif self.image == 3:
                     x = self.rect.x + 32
                     y = self.rect.y + 16
-                entities.append(Bullet(BULLET_IMAGES, x, y, 5, self.image))
-                pygame.mixer.music.load(SHOT_SOUND_PATH)
-                pygame.mixer.music.play()
+                entities.append(Bullet(BULLET_IMAGES, x, y, self.image))
+                pygame.mixer.Sound(SHOT_SOUND_PATH).play()
                 self.attack_allowed = 10
             else:
                 self.attack_allowed -= 1
@@ -343,7 +340,7 @@ def load_level(level_nummer: int) -> None:
     entities = []
     for tank in tanks:
         x, y = tuple(tank["spawn"])
-        entities.append(Tank(colors[tank["color"]], x, y, 1, 75))
+        entities.append(Tank(colors[tank["color"]], x, y, 1, 60))
     walls = []
     for wall in walls_:
         x, y = tuple(wall["position"])
@@ -391,10 +388,27 @@ def menu_screen() -> None:
     game_loop()
 
 
+def pause_screen() -> None:
+    """The pause screen."""
+    window.blit(pygame.font.SysFont("", 20).render(
+        "PAUSE", False, (0, 0, 0)), (380, 200))
+    pygame.display.update()
+    clock.tick(60)
+    paused = True
+    while paused:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_TAB:
+                    paused = False
+
+
 def game_winner_screen() -> None:
     """The game winner screen."""
     global level
-    level = 1
+    level += 1
     winner = True
     ok = True
     pygame.mixer.music.load(WINNER_MUSIC_PATH)
@@ -524,6 +538,7 @@ def game_loop() -> None:
     try:
         load_level(level)
     except:
+        level = 1
         game_winner_screen()
     game = True
     pygame.mixer.music.load(BACKGROUND_MUSIC_PATH)
@@ -539,6 +554,8 @@ def game_loop() -> None:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     game = False
+                elif event.key == pygame.K_TAB:
+                    pause_screen()
                 if event.key == ord("k"):
                     player.attack()
         keys = pygame.key.get_pressed()
@@ -559,7 +576,7 @@ def game_loop() -> None:
             wall.update()
         pygame.display.update()
         clock.tick(60)
-        if not any(isinstance(entity, Tank) for entity in entities):
+        if not entities:
             level_winner_screen()
     pygame.mixer.music.stop()
     menu_screen()
