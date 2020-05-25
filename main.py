@@ -55,7 +55,7 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.colliderect(player.rect):
             window.blit(self.explosion, (self.rect.x - 10, self.rect.y - 10))
             pygame.mixer.Sound(EXPLOSION_SOUND_PATH).play()
-            game_over()
+            result_screen(False)
 
     def attack(self) -> None:
         pass
@@ -252,58 +252,25 @@ pygame.display.set_icon(pygame.image.load(
 clock = pygame.time.Clock()
 
 # images for player tank
-PLAYER_IMAGE_UP = pygame.image.load(
-    f"images{os.sep}player{os.sep}player_up.png").convert_alpha()
-PLAYER_IMAGE_DOWN = pygame.image.load(
-    f"images{os.sep}player{os.sep}player_down.png").convert_alpha()
-PLAYER_IMAGE_LEFT = pygame.image.load(
-    f"images{os.sep}player{os.sep}player_left.png").convert_alpha()
-PLAYER_IMAGE_RIGHT = pygame.image.load(
-    f"images{os.sep}player{os.sep}player_right.png").convert_alpha()
-PLAYER_IMAGES = [PLAYER_IMAGE_UP, PLAYER_IMAGE_DOWN,
-                 PLAYER_IMAGE_LEFT, PLAYER_IMAGE_RIGHT]
+PLAYER_IMAGES = [pygame.image.load(f"images{os.sep}player{os.sep}player_up.png").convert_alpha(), pygame.image.load(f"images{os.sep}player{os.sep}player_down.png").convert_alpha(
+), pygame.image.load(f"images{os.sep}player{os.sep}player_left.png").convert_alpha(), pygame.image.load(f"images{os.sep}player{os.sep}player_right.png").convert_alpha()]
 # images for green tank
-TANK_GREEN_IMAGE_UP = pygame.image.load(
-    f"images{os.sep}tank_green{os.sep}tank_green_up.png").convert_alpha()
-TANK_GREEN_IMAGE_DOWN = pygame.image.load(
-    f"images{os.sep}tank_green{os.sep}tank_green_down.png").convert_alpha()
-TANK_GREEN_IMAGE_LEFT = pygame.image.load(
-    f"images{os.sep}tank_green{os.sep}tank_green_left.png").convert_alpha()
-TANK_GREEN_IMAGE_RIGHT = pygame.image.load(
-    f"images{os.sep}tank_green{os.sep}tank_green_right.png").convert_alpha()
-TANK_GREEN_IMAGES = [TANK_GREEN_IMAGE_UP, TANK_GREEN_IMAGE_DOWN,
-                     TANK_GREEN_IMAGE_LEFT, TANK_GREEN_IMAGE_RIGHT]
+TANK_GREEN_IMAGES = [pygame.image.load(f"images{os.sep}tank_green{os.sep}tank_green_up.png").convert_alpha(), pygame.image.load(f"images{os.sep}tank_green{os.sep}tank_green_down.png").convert_alpha(
+), pygame.image.load(f"images{os.sep}tank_green{os.sep}tank_green_left.png").convert_alpha(), pygame.image.load(f"images{os.sep}tank_green{os.sep}tank_green_right.png").convert_alpha()]
 # images for red tank
-TANK_RED_IMAGE_UP = pygame.image.load(
-    f"images{os.sep}tank_red{os.sep}tank_red_up.png").convert_alpha()
-TANK_RED_IMAGE_DOWN = pygame.image.load(
-    f"images{os.sep}tank_red{os.sep}tank_red_down.png").convert_alpha()
-TANK_RED_IMAGE_LEFT = pygame.image.load(
-    f"images{os.sep}tank_red{os.sep}tank_red_left.png").convert_alpha()
-TANK_RED_IMAGE_RIGHT = pygame.image.load(
-    f"images{os.sep}tank_red{os.sep}tank_red_right.png").convert_alpha()
-TANK_RED_IMAGES = [TANK_RED_IMAGE_UP, TANK_RED_IMAGE_DOWN,
-                   TANK_RED_IMAGE_LEFT, TANK_RED_IMAGE_RIGHT]
+TANK_RED_IMAGES = [pygame.image.load(f"images{os.sep}tank_red{os.sep}tank_red_up.png").convert_alpha(), pygame.image.load(f"images{os.sep}tank_red{os.sep}tank_red_down.png").convert_alpha(
+), pygame.image.load(f"images{os.sep}tank_red{os.sep}tank_red_left.png").convert_alpha(), pygame.image.load(f"images{os.sep}tank_red{os.sep}tank_red_right.png").convert_alpha()]
 # images for yellow tank
-TANK_YELLOW_IMAGE_UP = pygame.image.load(
-    f"images{os.sep}tank_yellow{os.sep}tank_yellow_up.png").convert_alpha()
-TANK_YELLOW_IMAGE_DOWN = pygame.image.load(
-    f"images{os.sep}tank_yellow{os.sep}tank_yellow_down.png").convert_alpha()
-TANK_YELLOW_IMAGE_LEFT = pygame.image.load(
-    f"images{os.sep}tank_yellow{os.sep}tank_yellow_left.png").convert_alpha()
-TANK_YELLOW_IMAGE_RIGHT = pygame.image.load(
-    f"images{os.sep}tank_yellow{os.sep}tank_yellow_right.png").convert_alpha()
-TANK_YELLOW_IMAGES = [TANK_YELLOW_IMAGE_UP, TANK_YELLOW_IMAGE_DOWN,
-                      TANK_YELLOW_IMAGE_LEFT, TANK_YELLOW_IMAGE_RIGHT]
+TANK_YELLOW_IMAGES = [pygame.image.load(f"images{os.sep}tank_yellow{os.sep}tank_yellow_up.png").convert_alpha(), pygame.image.load(f"images{os.sep}tank_yellow{os.sep}tank_yellow_down.png").convert_alpha(
+), pygame.image.load(f"images{os.sep}tank_yellow{os.sep}tank_yellow_left.png").convert_alpha(), pygame.image.load(f"images{os.sep}tank_yellow{os.sep}tank_yellow_right.png").convert_alpha()]
 # images for bullet
-BULLET_X_IMAGE = pygame.image.load(
-    f"images{os.sep}bullet{os.sep}bullet_x.png").convert_alpha()
-BULLET_Y_IMAGE = pygame.image.load(
-    f"images{os.sep}bullet{os.sep}bullet_y.png").convert_alpha()
-BULLET_IMAGES = [BULLET_X_IMAGE, BULLET_Y_IMAGE]
+BULLET_IMAGES = [pygame.image.load(f"images{os.sep}bullet{os.sep}bullet_x.png").convert_alpha(
+), pygame.image.load(f"images{os.sep}bullet{os.sep}bullet_y.png").convert_alpha()]
 # images for walls
-WALL_I_X_IMAGE = pygame.image.load(f"images{os.sep}wall{os.sep}wall_I_x.png")
-WALL_I_Y_IMAGE = pygame.image.load(f"images{os.sep}wall{os.sep}wall_I_y.png")
+WALL_I_X_IMAGE = pygame.image.load(
+    f"images{os.sep}wall{os.sep}wall_I_x.png").convert()
+WALL_I_Y_IMAGE = pygame.image.load(
+    f"images{os.sep}wall{os.sep}wall_I_y.png").convert()
 # image for explosion
 EXPLOSION_IMAGE = pygame.image.load(
     f"images{os.sep}explosion.png").convert_alpha()
@@ -340,7 +307,7 @@ def load_level(level_nummer: int) -> None:
     entities = []
     for tank in tanks:
         x, y = tuple(tank["spawn"])
-        entities.append(Tank(colors[tank["color"]], x, y, 1, 60))
+        entities.append(Tank(colors[tank["color"]], x, y, 1, 75))
     walls = []
     for wall in walls_:
         x, y = tuple(wall["position"])
@@ -370,18 +337,18 @@ def menu_screen() -> None:
                     else:
                         pygame.quit()
                         quit()
-        window.blit(pygame.font.SysFont("", 40).render(
-            "Tanks", False, (0, 0, 255)), (380, 70))
+        window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                        40).render("Tanks", False, (0, 0, 255)), (380, 70))
         if start:
-            window.blit(pygame.font.SysFont("", 20).render(
-                "Starten", False, (0, 0, 150)), (380, 150))
-            window.blit(pygame.font.SysFont("", 20).render(
-                "Beenden", False, (0, 0, 0)), (380, 200))
+            window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                            20).render("Starten", False, (0, 0, 150)), (380, 150))
+            window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                            20).render("Beenden", False, (0, 0, 0)), (380, 200))
         else:
-            window.blit(pygame.font.SysFont("", 20).render(
-                "Starten", False, (0, 0, 0)), (380, 150))
-            window.blit(pygame.font.SysFont("", 20).render(
-                "Beenden", False, (0, 0, 150)), (380, 200))
+            window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                            20).render("Starten", False, (0, 0, 0)), (380, 150))
+            window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                            20).render("Beenden", False, (0, 0, 150)), (380, 200))
         pygame.display.update()
         clock.tick(60)
     pygame.mixer.music.stop()
@@ -390,8 +357,8 @@ def menu_screen() -> None:
 
 def pause_screen() -> None:
     """The pause screen."""
-    window.blit(pygame.font.SysFont("", 20).render(
-        "PAUSE", False, (0, 0, 0)), (380, 200))
+    window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                    20).render("Pausiert", False, (0, 0, 0)), (380, 200))
     pygame.display.update()
     clock.tick(60)
     paused = True
@@ -405,10 +372,11 @@ def pause_screen() -> None:
                     paused = False
 
 
-def game_winner_screen() -> None:
-    """The game winner screen."""
+def result_screen(won: bool) -> None:
+    """The result screen.
+    Takes the variable won (integer)."""
+    text = {True: "Level geschafft.", False: "GAME OVER"}
     global level
-    level += 1
     winner = True
     ok = True
     pygame.mixer.music.load(WINNER_MUSIC_PATH)
@@ -430,106 +398,26 @@ def game_winner_screen() -> None:
                     else:
                         pygame.quit()
                         quit()
-        window.blit(pygame.font.SysFont("", 50).render(
-            "Du hast gewonnen!", False, (0, 155, 0)), (240, 150))
+        window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                        50).render(text[won], False, (0, 155, 0)), (240, 120))
         if ok:
-            window.blit(pygame.font.SysFont("", 20).render(
-                "Weiter", False, (0, 0, 150)), (280, 200))
-            window.blit(pygame.font.SysFont("", 20).render(
-                "Beenden", False, (0, 0, 0)), (420, 200))
+            window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                            20).render("Weiter", False, (0, 0, 150)), (290, 200))
+            window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                            20).render("Beenden", False, (0, 0, 0)), (430, 200))
         else:
-            window.blit(pygame.font.SysFont("", 20).render(
-                "Weiter", False, (0, 0, 0)), (280, 200))
-            window.blit(pygame.font.SysFont("", 20).render(
-                "Beenden", False, (0, 0, 150)), (420, 200))
+            window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                            20).render("Weiter", False, (0, 0, 0)), (290, 200))
+            window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                            20).render("Beenden", False, (0, 0, 150)), (430, 200))
         pygame.display.update()
         clock.tick(60)
     pygame.mixer.music.stop()
-    menu_screen()
-
-
-def level_winner_screen() -> None:
-    """The level winner screen."""
-    global level
-    level += 1
-    winner = True
-    ok = True
-    pygame.mixer.music.load(WINNER_MUSIC_PATH)
-    pygame.mixer.music.play(-1)
-    while winner:
-        window.fill((190, 190, 190))
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    ok = not ok
-                elif event.key == pygame.K_LEFT:
-                    ok = not ok
-                elif event.key == pygame.K_RETURN:
-                    if ok:
-                        winner = False
-                    else:
-                        pygame.quit()
-                        quit()
-        window.blit(pygame.font.SysFont("", 50).render(
-            "Level geschafft!", False, (0, 155, 0)), (240, 150))
-        if ok:
-            window.blit(pygame.font.SysFont("", 20).render(
-                "Weiter", False, (0, 0, 150)), (280, 200))
-            window.blit(pygame.font.SysFont("", 20).render(
-                "Beenden", False, (0, 0, 0)), (420, 200))
-        else:
-            window.blit(pygame.font.SysFont("", 20).render(
-                "Weiter", False, (0, 0, 0)), (280, 200))
-            window.blit(pygame.font.SysFont("", 20).render(
-                "Beenden", False, (0, 0, 150)), (420, 200))
-        pygame.display.update()
-        clock.tick(60)
-    pygame.mixer.music.stop()
-    game_loop()
-
-
-def game_over() -> None:
-    """The game over screen."""
-    game_over_ = True
-    ok = True
-    pygame.mixer.music.load(GAME_OVER_MUSIC_PATH)
-    pygame.mixer.music.play(-1)
-    while game_over_:
-        window.fill((190, 190, 190))
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                quit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    ok = not ok
-                elif event.key == pygame.K_LEFT:
-                    ok = not ok
-                elif event.key == pygame.K_RETURN:
-                    if ok:
-                        game_over_ = False
-                    else:
-                        pygame.quit()
-                        quit()
-        window.blit(pygame.font.SysFont("", 50).render(
-            "GAME OVER", False, (255, 0, 0)), (300, 150))
-        if ok:
-            window.blit(pygame.font.SysFont("", 20).render(
-                "OK", False, (0, 0, 150)), (300, 200))
-            window.blit(pygame.font.SysFont("", 20).render(
-                "Beenden", False, (0, 0, 0)), (420, 200))
-        else:
-            window.blit(pygame.font.SysFont("", 20).render(
-                "OK", False, (0, 0, 0)), (300, 200))
-            window.blit(pygame.font.SysFont("", 20).render(
-                "Beenden", False, (0, 0, 150)), (420, 200))
-        pygame.display.update()
-        clock.tick(60)
-    pygame.mixer.music.stop()
-    game_loop()
+    if won:
+        level += 1
+        game_loop()
+    else:
+        game_loop()
 
 
 def game_loop() -> None:
@@ -538,8 +426,7 @@ def game_loop() -> None:
     try:
         load_level(level)
     except:
-        level = 1
-        game_winner_screen()
+        menu_screen()
     game = True
     pygame.mixer.music.load(BACKGROUND_MUSIC_PATH)
     pygame.mixer.music.play(-1)
@@ -576,8 +463,8 @@ def game_loop() -> None:
             wall.update()
         pygame.display.update()
         clock.tick(60)
-        if not entities:
-            level_winner_screen()
+        if not any(isinstance(entity, Tank) for entity in entities):
+            result_screen(True)
     pygame.mixer.music.stop()
     menu_screen()
 
