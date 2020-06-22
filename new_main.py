@@ -1,8 +1,8 @@
 import json
 import os
+import random
 
 import pygame
-import random
 
 
 class Game:
@@ -31,6 +31,7 @@ class Game:
     def load_level(self):
         if not os.path.isfile(f"levels{os.sep}level_{self.level_number}.json"):
             self.level_number = 1
+            self.menu_screen()
         with open(f"levels{os.sep}level_{self.level_number}.json", "r") as f:
             level = json.load(f)
         self.player = Player(level["spawn"][0], level["spawn"]
@@ -106,12 +107,90 @@ class Game:
             pygame.display.update()
             self.clock.tick(self.config["fps"])
             if not self.enemies:
-                game = False
                 self.level_number += 1
+                self.result_screen(True)
+        self.result_screen(False)
+
+    def menu_screen(self):
+        menu = True
+        start = True
+        pygame.mixer.music.load(f"sound{os.sep}menu_song.wav")
+        pygame.mixer.music.play(-1)
+        while menu:
+            self.window.fill((190, 190, 190))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        start = not start
+                    elif event.key == pygame.K_DOWN:
+                        start = not start
+                    elif event.key == pygame.K_RETURN:
+                        if start:
+                            menu = False
+                        else:
+                            pygame.quit()
+                            quit()
+            self.window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                                 40).render("Tanks", False, (0, 0, 255)), (380, 70))
+            if start:
+                self.window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                                     20).render("Starten", False, (0, 0, 150)), (380, 150))
+                self.window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                                     20).render("Beenden", False, (0, 0, 0)), (380, 200))
+            else:
+                self.window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                                     20).render("Starten", False, (0, 0, 0)), (380, 150))
+                self.window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                                     20).render("Beenden", False, (0, 0, 150)), (380, 200))
+            pygame.display.update()
+            self.clock.tick(60)
+        pygame.mixer.music.stop()
         self.game_loop()
 
-    def start_menu(self):
-        pass
+    def result_screen(self, won):
+        text = {True: "Level geschafft.", False: "GAME OVER"}
+        text_ = {True: "Weiter", False: "Erneut"}
+        color = {True: (0, 150, 0), False: (255, 0, 0)}
+        winner = True
+        ok = True
+        pygame.mixer.music.load(f"sound{os.sep}winner_song.wav")
+        pygame.mixer.music.play(-1)
+        while winner:
+            self.window.fill((190, 190, 190))
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RIGHT:
+                        ok = not ok
+                    elif event.key == pygame.K_LEFT:
+                        ok = not ok
+                    elif event.key == pygame.K_RETURN:
+                        if ok:
+                            winner = False
+                        else:
+                            pygame.quit()
+                            quit()
+            self.window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                                 50).render(text[won], False, color[won]), (260, 120))
+            if ok:
+                self.window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                                     20).render(text_[won], False, (0, 0, 150)), (290, 200))
+                self.window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                                     20).render("Beenden", False, (0, 0, 0)), (430, 200))
+            else:
+                self.window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                                     20).render(text_[won], False, (0, 0, 0)), (290, 200))
+                self.window.blit(pygame.font.SysFont("Arial, Helvetica, sans-serif",
+                                                     20).render("Beenden", False, (0, 0, 150)), (430, 200))
+            pygame.display.update()
+            self.clock.tick(60)
+        pygame.mixer.music.stop()
+        self.game_loop()
 
 
 class Player(pygame.sprite.Sprite):
@@ -186,76 +265,6 @@ class Enemy(pygame.sprite.Sprite):
         self.firerate = firerate
         self.fire = self.firerate
 
-    def move_to_player(self, entities, player, HEIGHT, WIDTH):
-        if abs(player.rect.x - self.rect.x) > abs(player.rect.y - self.rect.y):
-            if self.rect.x < player.rect.x:
-                self.direction = 3
-                self.rect.x += self.speed
-                if any(self.rect.colliderect(entity.rect) for entity in entities if entity != self) or self.rect.y <= 0:
-                    self.rect.x -= self.speed
-            elif self.rect.x > player.rect.x:
-                self.direction = 1
-                self.rect.x -= self.speed
-                if any(self.rect.colliderect(entity.rect) for entity in entities if entity != self) or self.rect.x <= 0:
-                    self.rect.x += self.speed
-        else:
-            if self.rect.y < player.rect.y:
-                self.direction = 2
-                self.rect.y += self.speed
-                if any(self.rect.colliderect(entity.rect) for entity in entities if entity != self) or self.rect.y >= (HEIGHT - 32):
-                    self.rect.y -= self.speed
-            elif self.rect.y > player.rect.y:
-                self.direction = 0
-                self.rect.y -= self.speed
-                if any(self.rect.colliderect(entity.rect) for entity in entities if entity != self) or self.rect.x >= (WIDTH - 32):
-                    self.rect.y += self.speed
-
-    def move_pattern(self):
-        if self.rect.y <= 100:
-            if self.rect.x <= 200:
-                pass
-            elif self.rect.x <= 400:
-                pass
-            elif self.rect.x <= 600:
-                pass
-            elif self.rect.x <= 800:
-                pass
-        elif self.rect.y <= 200:
-            if self.rect.x <= 100:
-                pass
-            elif self.rect.x <= 300:
-                pass
-            elif self.rect.x <= 400:
-                pass
-            elif self.rect.x <= 500:
-                pass
-            elif self.rect.x <= 700:
-                pass
-            elif self.rect.x <= 800:
-                pass
-        elif self.rect.y <= 300:
-            if self.rect.x <= 100:
-                pass
-            elif self.rect.x <= 300:
-                pass
-            elif self.rect.x <= 400:
-                pass
-            elif self.rect.x <= 500:
-                pass
-            elif self.rect.x <= 700:
-                pass
-            elif self.rect.x <= 800:
-                pass
-        elif self.rect.y <= 100:
-            if self.rect.x <= 200:
-                pass
-            elif self.rect.x <= 400:
-                pass
-            elif self.rect.x <= 600:
-                pass
-            elif self.rect.x <= 800:
-                pass
-
     def move(self, entities, player, HEIGHT, WIDTH):
         if not self.detected_player:
             center_x = self.rect.x + 16
@@ -266,9 +275,28 @@ class Enemy(pygame.sprite.Sprite):
                     and abs(player_center_y - center_y) < self.detection_range:
                 self.detected_player = True
         if self.detected_player:
-            self.move_to_player(entities, player, HEIGHT, WIDTH)
-        else:
-            self.move_pattern()
+            if abs(player.rect.x - self.rect.x) > abs(player.rect.y - self.rect.y):
+                if self.rect.x < player.rect.x:
+                    self.direction = 3
+                    self.rect.x += self.speed
+                    if any(self.rect.colliderect(entity.rect) for entity in entities if entity != self) or self.rect.y <= 0:
+                        self.rect.x -= self.speed
+                elif self.rect.x > player.rect.x:
+                    self.direction = 1
+                    self.rect.x -= self.speed
+                    if any(self.rect.colliderect(entity.rect) for entity in entities if entity != self) or self.rect.x <= 0:
+                        self.rect.x += self.speed
+            else:
+                if self.rect.y < player.rect.y:
+                    self.direction = 2
+                    self.rect.y += self.speed
+                    if any(self.rect.colliderect(entity.rect) for entity in entities if entity != self) or self.rect.y >= (HEIGHT - 32):
+                        self.rect.y -= self.speed
+                elif self.rect.y > player.rect.y:
+                    self.direction = 0
+                    self.rect.y -= self.speed
+                    if any(self.rect.colliderect(entity.rect) for entity in entities if entity != self) or self.rect.x >= (WIDTH - 32):
+                        self.rect.y += self.speed
 
     def attack(self, player, bullets):
         center_x = self.rect.x + 16
@@ -365,4 +393,4 @@ class Wall(pygame.sprite.Sprite):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
 
-Game().game_loop()
+Game().menu_screen()
