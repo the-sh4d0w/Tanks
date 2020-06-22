@@ -1,0 +1,17 @@
+{
+    "fps": 60,
+    "speed": 2,
+    "firerate": 10,
+    "detection_range": 160,
+    "attack_range": 110,
+    "speeds": {
+        "red": 1,
+        "yellow": 2,
+        "green": 1
+    },
+    "firerates": {
+        "red": 10,
+        "yellow": 13,
+        "green": 5
+    }
+}
