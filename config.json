@@ -2,7 +2,7 @@
     "fps": 60,
     "speed": 2,
     "firerate": 10,
-    "detection_range": 160,
+    "detection_range": 200,
     "attack_range": 110,
     "speeds": {
         "red": 1,
