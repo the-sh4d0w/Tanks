@@ -207,7 +207,7 @@ class Player(pygame.sprite.Sprite):
         self.speed = speed
         self.direction = 0
         self.firerate = firerate
-        self.fire = self.firerate
+        self.fire = 0
 
     def move(self, entities, HEIGHT, WIDTH):
         keys = pygame.key.get_pressed()
@@ -241,6 +241,8 @@ class Player(pygame.sprite.Sprite):
                     Bullet(self.rect.x, self.rect.y, 4, self.direction))
             else:
                 self.fire -= 1
+        else:
+            self.fire = 0
 
     def update(self, window):
         window.blit(self.images[self.direction], (self.rect.x, self.rect.y))
