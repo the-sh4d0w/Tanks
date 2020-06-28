@@ -69,6 +69,8 @@ class Game:
                         self.invulnerable = not self.invulnerable
                     elif event.key == pygame.K_F3:
                         self.debug = not self.debug
+                    elif event.key == pygame.K_F4:
+                        game = False
             self.entities = self.enemies + [self.player] + self.walls
             self.player.move(self.entities, self.HEIGHT, self.WIDTH)
             self.player.attack(self.bullets)
