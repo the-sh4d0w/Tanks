@@ -194,6 +194,13 @@ class Game:
         pygame.mixer.music.stop()
         self.game_loop()
 
+    def splash_screen(self):
+        self.window.blit(pygame.transform.smoothscale(pygame.image.load(
+            f"images{os.sep}Evil Panda Studios Logo.png").convert_alpha(), (self.WIDTH, self.HEIGHT)), (0, 0))
+        pygame.display.update()
+        pygame.time.wait(3000)
+        self.menu_screen()
+
 
 class Player(pygame.sprite.Sprite):
 
@@ -397,4 +404,4 @@ class Wall(pygame.sprite.Sprite):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
 
-Game().menu_screen()
+Game().splash_screen()
