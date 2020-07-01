@@ -1,44 +1,149 @@
 {
     "spawn": [
-        200,
-        80
+        710,
+        210
     ],
     "enemies": [
         {
-            "color": "green",
-            "spawn": [
-                30,
-                30
-            ]
-        },
-        {
             "color": "red",
             "spawn": [
-                600,
-                50
+                10,
+                270
             ]
         },
         {
             "color": "yellow",
             "spawn": [
-                600,
-                360
+                110,
+                10
+            ]
+        },
+        {
+            "color": "green",
+            "spawn": [
+                710,
+                10
             ]
         }
     ],
     "walls": [
         {
+            "type": "I_y",
+            "position": [
+                100,
+                0
+            ]
+        },
+        {
             "type": "I_x",
             "position": [
-                200,
-                70
+                100,
+                100
             ]
         },
         {
             "type": "I_y",
             "position": [
-                240,
-                70
+                200,
+                100
+            ]
+        },
+        {
+            "type": "I_x",
+            "position": [
+                300,
+                100
+            ]
+        },
+        {
+            "type": "I_x",
+            "position": [
+                400,
+                100
+            ]
+        },
+        {
+            "type": "I_y",
+            "position": [
+                290,
+                100
+            ]
+        },
+        {
+            "type": "I_y",
+            "position": [
+                500,
+                100
+            ]
+        },
+        {
+            "type": "I_y",
+            "position": [
+                500,
+                200
+            ]
+        },
+        {
+            "type": "I_x",
+            "position": [
+                0,
+                200
+            ]
+        },
+        {
+            "type": "I_y",
+            "position": [
+                100,
+                200
+            ]
+        },
+        {
+            "type": "I_x",
+            "position": [
+                100,
+                300
+            ]
+        },
+        {
+            "type": "I_x",
+            "position": [
+                300,
+                300
+            ]
+        },
+        {
+            "type": "I_x",
+            "position": [
+                600,
+                300
+            ]
+        },
+        {
+            "type": "I_y",
+            "position": [
+                690,
+                200
+            ]
+        },
+        {
+            "type": "I_x",
+            "position": [
+                700,
+                200
+            ]
+        },
+        {
+            "type": "I_y",
+            "position": [
+                700,
+                0
+            ]
+        },
+        {
+            "type": "I_x",
+            "position": [
+                610,
+                100
             ]
         }
     ]
