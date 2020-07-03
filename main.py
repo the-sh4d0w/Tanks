@@ -2,6 +2,8 @@ import json
 import os
 import random
 
+from pathfinding.core.grid import Grid
+from pathfinding.finder.a_star import AStarFinder
 import pygame
 
 
@@ -11,8 +13,9 @@ class Game:
         pygame.init()
         self.WIDTH = 800
         self.HEIGHT = 400
-        self.window = pygame.display.set_mode(
-            size=(self.WIDTH, self.HEIGHT), flags=pygame.SCALED | pygame.RESIZABLE)
+        self.window = pygame.display.set_mode(size=(
+            self.WIDTH, self.HEIGHT), flags=pygame.SCALED | pygame.RESIZABLE)
+        pygame.event.set_allowed([pygame.QUIT, pygame.KEYDOWN])
         self.clock = pygame.time.Clock()
         self.player = None
         self.enemies = []
@@ -29,6 +32,12 @@ class Game:
             f"images{os.sep}player{os.sep}player_up.png").convert_alpha())
 
     def load_level(self):
+        matrix = []
+        for i in range(self.HEIGHT):
+            _ = []
+            for i in range(self.WIDTH):
+                _.append(1)
+            matrix.append(_)
         if not os.path.isfile(f"levels{os.sep}level_{self.level_number}.json"):
             self.level_number = 1
             self.menu_screen()
@@ -41,14 +50,24 @@ class Game:
         self.walls = []
         self.bullets = []
         self.entities.append(self.player)
-        for enemy in level["enemies"]:
-            enemy_ = Enemy(enemy["spawn"][0], enemy["spawn"][1], self.config["speeds"][enemy["color"]], self.config["firerates"]
-                           [enemy["color"]], enemy["color"], self.config["detection_range"], self.config["attack_range"])
-            self.enemies.append(enemy_)
         for wall in level["walls"]:
             wall_ = Wall(wall["position"][0],
                          wall["position"][1], wall["type"])
             self.walls.append(wall_)
+            x = wall["position"][0]
+            y = wall["position"][1]
+            if wall["type"] == "I_x":
+                for i in range(y, y+10):
+                    for j in range(x, x+100):
+                        matrix[i][j] = 0
+            else:
+                for i in range(y, y+100):
+                    for j in range(x, x+10):
+                        matrix[i][j] = 0
+        for enemy in level["enemies"]:
+            enemy_ = Enemy(enemy["spawn"][0], enemy["spawn"][1], self.config["speeds"][enemy["color"]], self.config["firerates"]
+                           [enemy["color"]], enemy["color"], self.config["detection_range"], self.config["attack_range"], matrix)
+            self.enemies.append(enemy_)
 
     def game_loop(self):
         self.load_level()
@@ -196,7 +215,7 @@ class Game:
 
     def splash_screen(self):
         self.window.blit(pygame.transform.smoothscale(pygame.image.load(
-            f"images{os.sep}Evil Panda Studios Logo.png").convert_alpha(), (self.WIDTH, self.HEIGHT)), (0, 0))
+            f"images{os.sep}Evil Panda Studios Logo.png").convert(), (self.WIDTH, self.HEIGHT)), (0, 0))
         pygame.display.update()
         pygame.time.wait(3000)
         self.menu_screen()
@@ -257,7 +276,7 @@ class Player(pygame.sprite.Sprite):
 
 class Enemy(pygame.sprite.Sprite):
 
-    def __init__(self, x, y, speed, firerate, color, detection_range, attack_range):
+    def __init__(self, x, y, speed, firerate, color, detection_range, attack_range, matrix):
         pygame.sprite.Sprite.__init__(self)
         images = {
             "red": [pygame.image.load(f"images{os.sep}tank_red{os.sep}tank_red_up.png").convert_alpha(), pygame.image.load(f"images{os.sep}tank_red{os.sep}tank_red_left.png").convert_alpha(), pygame.image.load(f"images{os.sep}tank_red{os.sep}tank_red_down.png").convert_alpha(), pygame.image.load(f"images{os.sep}tank_red{os.sep}tank_red_right.png").convert_alpha()],
@@ -275,6 +294,9 @@ class Enemy(pygame.sprite.Sprite):
         self.attack_range = attack_range
         self.firerate = firerate
         self.fire = self.firerate
+        self.grid = Grid(matrix=matrix)
+        self.pos = self.grid.node(self.rect.x, self.rect.y)
+        self.finder = AStarFinder()
 
     def move(self, entities, player, HEIGHT, WIDTH):
         if not self.detected_player:
@@ -286,28 +308,11 @@ class Enemy(pygame.sprite.Sprite):
                     and abs(player_center_y - center_y) < self.detection_range:
                 self.detected_player = True
         if self.detected_player:
-            if abs(player.rect.x - self.rect.x) > abs(player.rect.y - self.rect.y):
-                if self.rect.x < player.rect.x:
-                    self.direction = 3
-                    self.rect.x += self.speed
-                    if any(self.rect.colliderect(entity.rect) for entity in entities if entity != self) or self.rect.y <= 0:
-                        self.rect.x -= self.speed
-                elif self.rect.x > player.rect.x:
-                    self.direction = 1
-                    self.rect.x -= self.speed
-                    if any(self.rect.colliderect(entity.rect) for entity in entities if entity != self) or self.rect.x <= 0:
-                        self.rect.x += self.speed
-            else:
-                if self.rect.y < player.rect.y:
-                    self.direction = 2
-                    self.rect.y += self.speed
-                    if any(self.rect.colliderect(entity.rect) for entity in entities if entity != self) or self.rect.y >= (HEIGHT - 32):
-                        self.rect.y -= self.speed
-                elif self.rect.y > player.rect.y:
-                    self.direction = 0
-                    self.rect.y -= self.speed
-                    if any(self.rect.colliderect(entity.rect) for entity in entities if entity != self) or self.rect.x >= (WIDTH - 32):
-                        self.rect.y += self.speed
+            path, _ = self.finder.find_path(self.pos, self.grid.node(
+                player.rect.x, player.rect.y), self.grid)
+            self.rect.x, self.rect.y = path[1][0], path[1][1]
+            self.pos = self.grid.node(path[1][0], path[1][1])
+            self.grid.cleanup()
 
     def attack(self, player, bullets):
         center_x = self.rect.x + 16

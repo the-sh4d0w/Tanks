@@ -1,6 +1,6 @@
 # Tanks
-A tank battle game inspired by Tanks from [Wii Play](https://de.wikipedia.org/wiki/Wii_Play).
-Ein Panzerkampfspiel, das von Panzerkiste aus [Wii Play](https://de.wikipedia.org/wiki/Wii_Play) inspiriert ist.
+A tank battle game inspired by [Tanks from Wii Play](https://en.wikipedia.org/wiki/Wii_Play#Tanks!).
+Ein Panzerkampfspiel, das von [Panzerkiste aus Wii Play](https://de.wikipedia.org/wiki/Wii_Play#Inhalt) inspiriert ist.
 
 ## Eigene Level erstellen
 Dies ist Level 1. Er ist als JSON-Datei gespeichert.
