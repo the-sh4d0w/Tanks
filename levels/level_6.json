@@ -1,0 +1,45 @@
+{
+    "spawn": [
+        360,
+        110
+    ],
+    "enemies": [
+        {
+            "color": "red",
+            "spawn": [
+                10,
+                110
+            ]
+        },
+        {
+            "color": "yellow",
+            "spawn": [
+                660,
+                10
+            ]
+        },
+        {
+            "color": "green",
+            "spawn": [
+                560,
+                360
+            ]
+        }
+    ],
+    "walls": [
+        {
+            "type": "I_x",
+            "position": [
+                500,
+                0
+            ]
+        },
+        {
+            "type": "I_x",
+            "position": [
+                0,
+                300
+            ]
+        }
+    ]
+}
