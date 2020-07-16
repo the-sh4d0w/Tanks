@@ -2,8 +2,6 @@ import json
 import os
 import random
 
-from pathfinding.core.grid import Grid
-from pathfinding.finder.a_star import AStarFinder
 import pygame
 
 
@@ -29,7 +27,7 @@ class Game:
             self.config = json.load(f)
         pygame.display.set_caption("Tanks")
         pygame.display.set_icon(pygame.image.load(
-            f"images{os.sep}player{os.sep}player_up.png").convert_alpha())
+            f"images{os.sep}icon.png").convert_alpha())
 
     def load_level(self):
         matrix = []
@@ -294,9 +292,7 @@ class Enemy(pygame.sprite.Sprite):
         self.attack_range = attack_range
         self.firerate = firerate
         self.fire = self.firerate
-        self.grid = Grid(matrix=matrix)
-        self.pos = self.grid.node(self.rect.x, self.rect.y)
-        self.finder = AStarFinder()
+        self.graph = matrix
 
     def move(self, entities, player, HEIGHT, WIDTH):
         if not self.detected_player:
@@ -307,12 +303,8 @@ class Enemy(pygame.sprite.Sprite):
             if abs(player_center_x - center_x) < self.detection_range \
                     and abs(player_center_y - center_y) < self.detection_range:
                 self.detected_player = True
-        if self.detected_player:
-            path, _ = self.finder.find_path(self.pos, self.grid.node(
-                player.rect.x, player.rect.y), self.grid)
-            self.rect.x, self.rect.y = path[1][0], path[1][1]
-            self.pos = self.grid.node(path[1][0], path[1][1])
-            self.grid.cleanup()
+        else:
+            pass
 
     def attack(self, player, bullets):
         center_x = self.rect.x + 16
