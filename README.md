@@ -81,6 +81,6 @@ Dies sind die Standardeinstellungen. Sie sind als JSON-Datei gespeichert.
     }
 }
 ```
-"fps" stellt die frames per second also die Bilder pro Sekunde dar. Bitte nicht verändern.
+"fps" stellt die frames per second, also die Bilder pro Sekunde, dar. Bitte nicht verändern.
 "speed" ist die Geschwindigkeit des Spielers. Je höher, desto schneller.
-"firerate" ist die Feuerrate. je niedriger, desto schneller.
+"firerate" ist die Feuerrate. Je niedriger, desto schneller.
