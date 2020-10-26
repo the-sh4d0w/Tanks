@@ -1,3 +1,5 @@
+|This is an unfinished project. It does not work.|
+-|
 # Tanks
 A tank battle game inspired by [Tanks from Wii Play](https://en.wikipedia.org/wiki/Wii_Play#Tanks!).
 Ein Panzerkampfspiel, das von [Panzerkiste aus Wii Play](https://de.wikipedia.org/wiki/Wii_Play#Inhalt) inspiriert ist.
@@ -78,7 +80,7 @@ Dies sind die Standardeinstellungen. Sie sind als JSON-Datei gespeichert.
         "green": 5
     }
 }
-´´´
+```
 "fps" stellt die frames per second also die Bilder pro Sekunde dar. Bitte nicht verändern.
 "speed" ist die Geschwindigkeit des Spielers. Je höher, desto schneller.
 "firerate" ist die Feuerrate. je niedriger, desto schneller.
